@@ -1,0 +1,314 @@
+1.1 
+select *
+from teacher
+
+1.2 
+select *
+from student_group
+where speciality like 'ЭВМ'
+
+
+1.3 
+select teacher_id, classroom
+from teacher_group
+where subject_id like '18П'
+
+1.4 
+select C.ID, C.subject_name
+from academic_subject as C
+         join
+     (select A.subject_id
+      from teacher_group as A
+               join
+           teacher B on A.teacher_id = B.ID
+      where B.last_name like 'Костин'
+      group by A.subject_id) as D
+on C.ID like D.subject_id
+
+
+1.5  
+select A.group_id
+from teacher_group as A
+         join teacher t on A.teacher_id = t.ID
+where t.last_name like 'Фролов'
+
+1.6 
+select *
+from academic_subject as D
+         join (select B.subject_id
+               from teacher_group as B
+                        join (select A.ID
+                              from student_group as A
+                              where speciality like 'АСОИ') as C
+                             on C.ID like B.group_id
+               group by subject_id) as E
+              on E.subject_id like d.ID
+
+1.7 
+select *
+from teacher as D
+         join (select B.teacher_id
+               from teacher_group as B
+                        join (select A.ID
+                              from student_group as A
+                              where speciality like 'АСОИ') as C
+                             on C.ID like B.group_id
+               group by subject_id) as E
+              on E.teacher_id like d.ID
+
+
+1.8 
+select A.last_name
+from teacher as A
+         join teacher_group tg on A.ID = tg.teacher_id
+where classroom like 210
+group by last_name
+
+
+1.9 
+select B.group_name, C.subject_name
+from teacher_group as A
+         join student_group B on A.group_id = B.ID
+         join academic_subject C On A.subject_id like C.ID
+where A.classroom between 100 and 200
+
+1.10
+select A.ID, B.ID
+from student_group as A
+         JOIN student_group as B
+              on a.speciality like b.speciality
+                  and a.id < b.id
+
+1.11
+select SUM(students_amount) from student_group where speciality like 'ЭВМ'
+
+1.12
+select distinct t.ID
+from teacher_group as tg
+         join teacher t on tg.teacher_id like t.ID
+         join student_group sg on  tg.group_id  like sg.id
+where sg.speciality like 'ЭВМ'
+
+1.13
+
+select c.id
+from (
+         select *
+         from (
+                  select S.id, count(*) as K
+                  from academic_subject as S
+                           join teacher_group tg on s.ID like tg.subject_id
+                  group by s.id
+              ) as result
+         where K like (
+             select count(*)
+             from student_group
+         )
+     ) as C
+
+
+
+1.14
+
+select T.Last_name
+from teacher as T
+         join (select C.teacher_id
+               from teacher_group as C
+                        join (select B.subject_id
+                              from teacher_group as B
+                              where B.teacher_id like (select A.teacher_id
+                                                       from teacher_group as A
+                                                       where subject_id like '14П'
+                                                       group by A.teacher_id)
+                              group by B.subject_id) as D
+                             on C.subject_id like D.subject_id
+               group by teacher_id) as N
+              on T.ID like N.teacher_id
+
+
+1.15
+
+select B.subject_name
+from academic_subject B
+where subject_name not in (select distinct subject_name
+                           from teacher_group
+                                    join academic_subject s on s.ID like teacher_group.subject_id
+                           where teacher_id like '221Л')
+
+
+1.16
+
+select distinct subject_id
+from teacher_group
+         join academic_subject
+where subject_id like academic_subject.ID
+  and academic_subject.ID not in (select distinct subject_id
+                                  from teacher_group
+                                  where group_id like (select ID from student_group where group_name like 'М-6'))
+
+1.17
+
+select distinct teacher_id, last_name, position, department, speciality, local_phone
+from teacher_group
+         join teacher t on teacher_group.teacher_id = t.ID
+where group_id in ('3Г', '8Г')
+  and t.position like 'Доцент'
+
+1.18
+
+select subject_id, teacher_id, group_id
+from teacher_group
+where teacher_id in (select id from teacher where department like 'ЭВМ' and speciality like '%АСОИ%')
+
+
+1.19 
+
+select distinct group_id
+from teacher_group
+         join teacher t on teacher_group.teacher_id like t.ID
+         join student_group sg on group_id like sg.ID
+where t.speciality like CONCAT('%', sg.speciality, '%')
+
+1.20 
+
+select distinct teacher_id
+from teacher_group
+         join teacher t on teacher_group.teacher_id like t.ID
+         join student_group sg on group_id like sg.ID
+where t.speciality like CONCAT('%', sg.speciality, '%')
+and t.department like 'ЭВМ'
+
+1.21
+
+select distinct sg.speciality
+from teacher_group
+         join teacher t on teacher_group.teacher_id like t.ID
+         join student_group sg on group_id like sg.ID
+where teacher_id like (select ID from teacher where department like 'АСУ')
+
+1.22
+
+select distinct subject_id
+from teacher_group
+         join student_group sg on group_id like sg.ID
+where group_name like 'АС-8'
+
+1.23
+
+select distinct group_id
+from teacher_group
+where subject_id in
+      (
+          select teacher_group.subject_id
+          from teacher_group
+                   join student_group on teacher_group.group_id like student_group.ID
+      )
+  and group_id not in
+      (
+          select id
+          from student_group
+          where group_name = 'AC-8'
+      )
+
+1.24
+
+select distinct group_id
+from teacher_group
+where subject_id not in (
+    select teacher_group.subject_id
+    from teacher_group join student_group sg on teacher_group.group_id like sg.ID
+    )
+
+1.25
+
+select distinct group_id
+from teacher_group
+where group_id not in
+      (
+          select group_id
+          from teacher_group
+          where teacher_id = '430Л'
+      )
+
+1.26
+
+select teacher_id
+from teacher_group
+         join student_group sg on teacher_group.group_id like sg.ID
+         join academic_subject on subject_id like academic_subject.ID
+where group_name like 'Э-15'
+  and subject_name not like '12П'
+
+
+
+21.	Получить номера деталей, поставляемых для какого-либо проекта в Лондоне.
+
+select detail_id
+from dependencies
+         join project p on p.id = dependencies.project_id
+where p.city like 'Лондон'
+
+22.	Получить номера проектов, использующих по крайней мере одну деталь, имеющуюся у поставщика П1.
+
+select project_id
+from dependencies
+where provider_id like 'П1'
+
+30.	Получить номера деталей, поставляемых для лондонских проектов.
+
+select detail_id
+from dependencies
+         join project p on p.id = dependencies.project_id
+where p.city like 'Лондон'
+
+3.	Получить номера поставщиков, которые обеспечивают проект ПР1.
+
+select provider_id
+from dependencies
+where project_id like 'ПР1'
+
+8.	Получить все такие тройки "номера поставщиков-номера деталей-номера проектов", для которых никакие из двух выводимых поставщиков, деталей и проектов не размещены в одном городе.
+
+select provider_id, detail_id, project_id
+from dependencies
+         join project p on dependencies.project_id = p.id
+         join provider p2 on dependencies.provider_id = p2.id
+where p.city not like p2.city
+
+12.	Получить номера деталей, поставляемых для всех проектов, обеспечиваемых поставщиком из того же города, где размещен проект.
+
+select provider_id, detail_id, project_id
+from dependencies
+         join project p on dependencies.project_id = p.id
+         join provider p2 on dependencies.provider_id = p2.id
+where p.city like p2.city
+
+16.	Получить общее количество деталей Д1, поставляемых поставщиком П1.
+
+select SUM(amount)
+from dependencies
+where provider_id like 'П1'
+
+32.	Получить номера проектов, обеспечиваемых по крайней мере всеми деталями поставщика П1.
+
+select project_id
+from dependencies
+where provider_id like 'П1'
+
+
+26.	Получить номера проектов, для которых среднее количество поставляемых деталей Д1 больше, чем наибольшее количество любых деталей, поставляемых для проекта ПР1.
+
+select project_id
+from (
+         select project_id, avg(amount) as average1
+         from dependencies
+         where detail_id like 'Д1'
+         group by project_id
+     ) as A
+where average1 > (select max(amount) from dependencies where dependencies.project_id like 'ПР1')
+
+17.	Для каждой детали, поставляемой для проекта, получить номер детали, номер проекта и соответствующее общее количество.
+
+select project_id, detail_id, SUM(amount)
+from dependencies
+group by project_id, detail_id
